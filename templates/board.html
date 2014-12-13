@@ -3,18 +3,23 @@
     <title>Project Trello</title>
 </head>
 <body>
-    <h1>{{ board.name }}</h1>
+    <h1>Board</h1>
     <form action="/request/" method="post">
-        <input type="hidden" name="delete_board" value="{{ board.id }}">
-        <input type="submit" value="Delete board">
+        <input type="text" name="board_name" value="{{ board.name }}" size="10" style="font-size:25px">
+        <input type="hidden" name="board_id" value="{{ board.id }}">
+        <input type="submit" name="rename_board" value="Rename">
+        <input type="submit" name="delete_board" value="Delete board">
     </form>
+    <hr>
     {% if nlists %}
     <ul>
+        Lists
         {% for list in lists %}
         <li><a href="Lists/{{ list.id }}/">{{ list.name }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}
     <p><a href="new_list/">create new list</a></p>
+    <p><a href="/">Back</a></p>
 </body>
 </html>
