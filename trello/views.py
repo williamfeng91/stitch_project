@@ -33,15 +33,36 @@ def list(request, board_id, list_id):
         list = List.objects.get(id=list_id)
     except List.DoesNotExist:
         raise Http404()
+    cards = Card.objects
+    count = cards.count()
+    card_list = cards.all()
     return render(request, 'list.html', {
-        'deletion_error': False,
         'board_id': board_id,
         'list': list,
+        'ncards': count,
+        'cards': card_list,
     })
 
 def new_list(request, board_id):
     return render(request, 'new_list.html', {
         'board_id': board_id,
+    })
+
+def card(request, board_id, list_id, card_id):
+    try:
+        card = Card.objects.get(id=card_id)
+    except Card.DoesNotExist:
+        raise Http404()
+    return render(request, 'card.html', {
+        'board_id': board_id,
+        'list_id': list_id,
+        'card': card,
+    })
+
+def new_card(request, board_id, list_id):
+    return render(request, 'new_card.html', {
+        'board_id': board_id,
+        'list_id': list_id,
     })
 
 def request_handler(request):
@@ -70,6 +91,27 @@ def request_handler(request):
         except List.DoesNotExist:
             pass
         redirect_url='/Boards/%s/' % (request.POST['board_id'])
+        return HttpResponseRedirect(redirect_url)
+    elif 'add_card' in request.POST and request.POST['add_card']:
+        list = request.POST['list_id'];
+        c = Card(
+            title=request.POST['add_card'],
+            description=request.POST['description'],
+            due_date=request.POST['due_date'],
+            list_id=list,
+        )
+        c.save()
+        redirect_url='/Boards/%s/Lists/%s/' % (request.POST['board_id'], list)
+        return HttpResponseRedirect(redirect_url)
+    elif 'delete_card' in request.POST and request.POST['delete_card']:
+        try:
+            c = Card.objects.get(id=request.POST['delete_card'])
+            c.delete()
+        except Card.DoesNotExist:
+            pass
+        redirect_url='/Boards/%s/Lists/%s/' % (
+            request.POST['board_id'],
+            request.POST['list_id'])
         return HttpResponseRedirect(redirect_url)
     else:
         raise Http404()
