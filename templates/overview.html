@@ -7,10 +7,10 @@
     {% if nboards %}
     <ul>
         {% for board in boards %}
-        <li><a href="Boards/{{ board.id }}">{{ board.name }}</a></li>
+        <li><a href="Boards/{{ board.id }}/">{{ board.name }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}
-    <p><a href="new_board">create new board</a></p>
+    <p><a href="new_board/">create new board</a></p>
 </body>
 </html>

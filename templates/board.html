@@ -4,17 +4,17 @@
 </head>
 <body>
     <h1>{{ board.name }}</h1>
-    <form action="/request" method="post">
+    <form action="/request/" method="post">
         <input type="hidden" name="delete_board" value="{{ board.id }}">
         <input type="submit" value="Delete board">
     </form>
     {% if nlists %}
     <ul>
         {% for list in lists %}
-        <li><a href="Lists/{{ list.id }}">{{ list.name }}</a></li>
+        <li><a href="Lists/{{ list.id }}/">{{ list.name }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}
-    <p><a href="new_board">create new list</a></p>
+    <p><a href="new_list/">create new list</a></p>
 </body>
 </html>
