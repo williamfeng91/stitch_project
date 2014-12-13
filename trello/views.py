@@ -109,66 +109,77 @@ def new_member(request):
     return render(request, 'new_member.html')
 
 def request_handler(request):
-    if 'add_board' in request.POST and request.POST['add_board']:
-        b = Board(name=request.POST['add_board'])
-        b.save()
-    elif 'delete_board' in request.POST and request.POST['board_id']:
+    if 'add_board' in request.POST:
+        if request.POST['add_board'] and len(request.POST['add_board']) <= 30:
+            b = Board(name=request.POST['add_board'])
+            b.save()
+    elif 'delete_board' in request.POST:
         try:
             b = Board.objects.get(id=request.POST['board_id'])
             b.delete()
         except Board.DoesNotExist:
             pass
-    elif 'rename_board' in request.POST and request.POST['board_id'] and request.POST['board_name']:
-        try:
-            b = Board.objects.get(id=request.POST['board_id'])
-            b.name = request.POST['board_name']
-            b.save()
-        except Board.DoesNotExist:
-            pass
+    elif 'rename_board' in request.POST:
+        if request.POST['board_name'] and len(request.POST['board_name']) <= 30:
+            try:
+                b = Board.objects.get(id=request.POST['board_id'])
+                b.name = request.POST['board_name']
+                b.save()
+            except Board.DoesNotExist:
+                pass
         redirect_url='/Boards/%s/' % (
-            request.POST['board_id'])
-        return HttpResponseRedirect(redirect_url)
-    elif 'add_list' in request.POST and request.POST['add_list']:
-        board = request.POST['board_id'];
-        l = List(
-            name=request.POST['add_list'],
-            board_id=board,
+            request.POST['board_id'],
         )
-        l.save()
-        redirect_url='/Boards/%s/' % (board)
         return HttpResponseRedirect(redirect_url)
-    elif 'delete_list' in request.POST and request.POST['list_id']:
+    elif 'add_list' in request.POST:
+        if request.POST['add_list'] and len(request.POST['add_list']) <= 30:
+            l = List(
+                name=request.POST['add_list'],
+                board_id=request.POST['board_id'],
+            )
+            l.save()
+        redirect_url='/Boards/%s/' % (
+            request.POST['board_id'],
+        )
+        return HttpResponseRedirect(redirect_url)
+    elif 'delete_list' in request.POST:
         try:
             l = List.objects.get(id=request.POST['list_id'])
             l.delete()
         except List.DoesNotExist:
             pass
-        redirect_url='/Boards/%s/' % (request.POST['board_id'])
-        return HttpResponseRedirect(redirect_url)
-    elif 'rename_list' in request.POST and request.POST['list_id'] and request.POST['list_name']:
-        try:
-            l = List.objects.get(id=request.POST['list_id'])
-            l.name = request.POST['list_name']
-            l.save()
-        except List.DoesNotExist:
-            pass
-        redirect_url='/Boards/%s/Lists/%s/' % (
+        redirect_url='/Boards/%s/' % (
             request.POST['board_id'],
-            request.POST['list_id'])
-        return HttpResponseRedirect(redirect_url)
-    elif 'add_card' in request.POST and request.POST['add_card']:
-        c = Card(
-            title=request.POST['add_card'],
-            description=request.POST['description'],
-            due_date=request.POST['due_date'],
-            list_id=request.POST['list_id'],
         )
-        c.save()
+        return HttpResponseRedirect(redirect_url)
+    elif 'rename_list' in request.POST:
+        if request.POST['list_name'] and len(request.POST['list_name']) <= 30:
+            try:
+                l = List.objects.get(id=request.POST['list_id'])
+                l.name = request.POST['list_name']
+                l.save()
+            except List.DoesNotExist:
+                pass
         redirect_url='/Boards/%s/Lists/%s/' % (
             request.POST['board_id'],
-            request.POST['list_id'])
+            request.POST['list_id'],
+        )
         return HttpResponseRedirect(redirect_url)
-    elif 'delete_card' in request.POST and request.POST['card_id']:
+    elif 'add_card' in request.POST:
+        if request.POST['add_card'] and len(request.POST['add_card']) <= 30 and len(request.POST['description']) <= 100 and request.POST['due_date'] and request.POST['list_id']:
+            c = Card(
+                title=request.POST['add_card'],
+                description=request.POST['description'],
+                due_date=request.POST['due_date'],
+                list_id=request.POST['list_id'],
+            )
+            c.save()
+        redirect_url='/Boards/%s/Lists/%s/' % (
+            request.POST['board_id'],
+            request.POST['list_id'],
+        )
+        return HttpResponseRedirect(redirect_url)
+    elif 'delete_card' in request.POST:
         try:
             c = Card.objects.get(id=request.POST['card_id'])
             c.delete()
@@ -176,13 +187,16 @@ def request_handler(request):
             pass
         redirect_url='/Boards/%s/Lists/%s/' % (
             request.POST['board_id'],
-            request.POST['list_id'])
+            request.POST['list_id'],
+        )
         return HttpResponseRedirect(redirect_url)
-    elif 'edit_card' in request.POST and request.POST['card_id'] and request.POST['card_title']:
+    elif 'edit_card' in request.POST:
         try:
             c = Card.objects.get(id=request.POST['card_id'])
-            c.title = request.POST['card_title']
-            c.description = request.POST['card_description']
+            if request.POST['card_title'] and len(request.POST['card_title']) <= 30:
+                c.title = request.POST['card_title']
+            if len(request.POST['card_description']) <= 100:
+                c.description = request.POST['card_description']
             if request.POST['card_due_date']:
                 c.due_date = request.POST['card_due_date']
             if request.POST['moveTo'] and request.POST['moveTo'] != c.list_id:
@@ -193,21 +207,24 @@ def request_handler(request):
         redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
             request.POST['board_id'],
             c.list_id,
-            request.POST['card_id'])
-        return HttpResponseRedirect(redirect_url)
-    elif 'add_label' in request.POST and request.POST['add_label']:
-        lb = Label(
-            name=request.POST['add_label'],
-            board_id=request.POST['board_id'],
-            card_id=request.POST['card_id'],
+            request.POST['card_id'],
         )
-        lb.save()
+        return HttpResponseRedirect(redirect_url)
+    elif 'add_label' in request.POST:
+        if request.POST['add_label'] and len(request.POST['add_label']) <= 30:
+            lb = Label(
+                name=request.POST['add_label'],
+                board_id=request.POST['board_id'],
+                card_id=request.POST['card_id'],
+            )
+            lb.save()
         redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
             request.POST['board_id'],
             request.POST['list_id'],
-            request.POST['card_id'])
+            request.POST['card_id'],
+        )
         return HttpResponseRedirect(redirect_url)
-    elif 'delete_label' in request.POST and request.POST['label_id']:
+    elif 'delete_label' in request.POST:
         try:
             lb = Label.objects.get(id=request.POST['label_id'])
             lb.delete()
@@ -216,26 +233,30 @@ def request_handler(request):
         redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
             request.POST['board_id'],
             request.POST['list_id'],
-            request.POST['card_id'])
+            request.POST['card_id'],
+        )
         return HttpResponseRedirect(redirect_url)
-    elif 'rename_label' in request.POST and request.POST['label_id'] and request.POST['label_name']:
-        try:
-            lb = Label.objects.get(id=request.POST['label_id'])
-            lb.name = request.POST['label_name']
-            lb.save()
-        except Label.DoesNotExist:
-            pass
+    elif 'rename_label' in request.POST:
+        if request.POST['label_name'] and len(request.POST['label_name']) <= 30:
+            try:
+                lb = Label.objects.get(id=request.POST['label_id'])
+                lb.name = request.POST['label_name']
+                lb.save()
+            except Label.DoesNotExist:
+                pass
         redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
             request.POST['board_id'],
             request.POST['list_id'],
-            request.POST['card_id'])
+            request.POST['card_id'],
+        )
         return HttpResponseRedirect(redirect_url)
-    elif 'add_member' in request.POST and request.POST['add_member']:
-        m = Member(name=request.POST['add_member'])
-        m.save()
+    elif 'add_member' in request.POST:
+        if request.POST['add_member'] and len(request.POST['add_member']) <= 70:
+            m = Member(name=request.POST['add_member'])
+            m.save()
         redirect_url='/Members/'
         return HttpResponseRedirect(redirect_url)
-    elif 'delete_member' in request.POST and request.POST['member_id']:
+    elif 'delete_member' in request.POST:
         try:
             m = Member.objects.get(id=request.POST['member_id'])
             m.delete()
@@ -243,17 +264,19 @@ def request_handler(request):
             pass
         redirect_url='/Members/'
         return HttpResponseRedirect(redirect_url)
-    elif 'rename_member' in request.POST and request.POST['member_id'] and request.POST['member_name']:
-        try:
-            m = Member.objects.get(id=request.POST['member_id'])
-            m.name = request.POST['member_name']
-            m.save()
-        except Member.DoesNotExist:
-            pass
+    elif 'rename_member' in request.POST:
+        if request.POST['member_name'] and len(request.POST['member_name']) <= 70:
+            try:
+                m = Member.objects.get(id=request.POST['member_id'])
+                m.name = request.POST['member_name']
+                m.save()
+            except Member.DoesNotExist:
+                pass
         redirect_url='/Members/%s/' % (
-            request.POST['member_id'])
+            request.POST['member_id'],
+        )
         return HttpResponseRedirect(redirect_url)
-    elif 'assign_member' in request.POST and request.POST['new_member']:
+    elif 'assign_member' in request.POST:
         try:
             m = Member.objects.get(id=request.POST['new_member'])
             c = Card.objects.get(id=request.POST['card_id'])
@@ -266,7 +289,8 @@ def request_handler(request):
         redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
             request.POST['board_id'],
             request.POST['list_id'],
-            request.POST['card_id'])
+            request.POST['card_id'],
+        )
         return HttpResponseRedirect(redirect_url)
     elif 'list_up' in request.POST:
         try:
@@ -283,7 +307,8 @@ def request_handler(request):
         except List.DoesNotExist:
             pass
         redirect_url='/Boards/%s/' % (
-            request.POST['board_id'])
+            request.POST['board_id'],
+        )
         return HttpResponseRedirect(redirect_url)
     elif 'list_down' in request.POST:
         try:
@@ -300,7 +325,8 @@ def request_handler(request):
         except List.DoesNotExist:
             pass
         redirect_url='/Boards/%s/' % (
-            request.POST['board_id'])
+            request.POST['board_id'],
+        )
         return HttpResponseRedirect(redirect_url)
     elif 'card_up' in request.POST:
         try:
@@ -318,7 +344,8 @@ def request_handler(request):
             pass
         redirect_url='/Boards/%s/Lists/%s/' % (
             request.POST['board_id'],
-            request.POST['list_id'])
+            request.POST['list_id'],
+        )
         return HttpResponseRedirect(redirect_url)
     elif 'card_down' in request.POST:
         try:
@@ -336,7 +363,8 @@ def request_handler(request):
             pass
         redirect_url='/Boards/%s/Lists/%s/' % (
             request.POST['board_id'],
-            request.POST['list_id'])
+            request.POST['list_id'],
+        )
         return HttpResponseRedirect(redirect_url)
     else:
         raise Http404()
