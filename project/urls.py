@@ -9,5 +9,6 @@ urlpatterns = patterns('',
     url(r'^Boards/(\d+)/Lists/(\d+)/$', views.list),
     url(r'^Boards/(\d+)/Lists/(\d+)/new_card/$', views.new_card),
     url(r'^Boards/(\d+)/Lists/(\d+)/Cards/(\d+)/$', views.card),
+    url(r'^Boards/(\d+)/Lists/(\d+)/Cards/(\d+)/new_label/$', views.new_label),
     url(r'^.*$', views.home),
 )

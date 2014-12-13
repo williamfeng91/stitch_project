@@ -53,16 +53,28 @@ def card(request, board_id, list_id, card_id):
         card = Card.objects.get(id=card_id)
     except Card.DoesNotExist:
         raise Http404()
+    labels = Label.objects
+    count = labels.count()
+    label_list = labels.all()
     return render(request, 'card.html', {
         'board_id': board_id,
         'list_id': list_id,
         'card': card,
+        'nlabels': count,
+        'labels': label_list,
     })
 
 def new_card(request, board_id, list_id):
     return render(request, 'new_card.html', {
         'board_id': board_id,
         'list_id': list_id,
+    })
+
+def new_label(request, board_id, list_id, card_id):
+    return render(request, 'new_label.html', {
+        'board_id': board_id,
+        'list_id': list_id,
+        'card_id': card_id,
     })
 
 def request_handler(request):
@@ -93,15 +105,16 @@ def request_handler(request):
         redirect_url='/Boards/%s/' % (request.POST['board_id'])
         return HttpResponseRedirect(redirect_url)
     elif 'add_card' in request.POST and request.POST['add_card']:
-        list = request.POST['list_id'];
         c = Card(
             title=request.POST['add_card'],
             description=request.POST['description'],
             due_date=request.POST['due_date'],
-            list_id=list,
+            list_id=request.POST['list_id'],
         )
         c.save()
-        redirect_url='/Boards/%s/Lists/%s/' % (request.POST['board_id'], list)
+        redirect_url='/Boards/%s/Lists/%s/' % (
+            request.POST['board_id'],
+            request.POST['list_id'])
         return HttpResponseRedirect(redirect_url)
     elif 'delete_card' in request.POST and request.POST['delete_card']:
         try:
@@ -112,6 +125,28 @@ def request_handler(request):
         redirect_url='/Boards/%s/Lists/%s/' % (
             request.POST['board_id'],
             request.POST['list_id'])
+        return HttpResponseRedirect(redirect_url)
+    elif 'add_label' in request.POST and request.POST['add_label']:
+        lb = Label(
+            name=request.POST['add_label'],
+            card_id=request.POST['card_id'],
+        )
+        lb.save()
+        redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
+            request.POST['board_id'],
+            request.POST['list_id'],
+            request.POST['card_id'])
+        return HttpResponseRedirect(redirect_url)
+    elif 'delete_label' in request.POST and request.POST['delete_label']:
+        try:
+            lb = Label.objects.get(id=request.POST['delete_label'])
+            lb.delete()
+        except Label.DoesNotExist:
+            pass
+        redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
+            request.POST['board_id'],
+            request.POST['list_id'],
+            request.POST['card_id'])
         return HttpResponseRedirect(redirect_url)
     else:
         raise Http404()
