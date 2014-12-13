@@ -3,6 +3,9 @@ from trello import views
 
 urlpatterns = patterns('',
     url(r'^request/$', views.request_handler),
+    url(r'^Members/new_member/$', views.new_member),
+    url(r'^Members/$', views.members),
+    url(r'^Members/(\d+)/$', views.member),
     url(r'^new_board/$', views.new_board),
     url(r'^Boards/(\d+)/$', views.board),
     url(r'^Boards/(\d+)/new_list/$', views.new_list),

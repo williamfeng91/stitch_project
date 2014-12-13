@@ -3,6 +3,8 @@
     <title>Project Trello</title>
 </head>
 <body>
+    <p align="right"><a href="/Members/">Members</a></p>
+    <hr>
     <h1>Board</h1>
     <form action="/request/" method="post">
         <input type="text" name="board_name" value="{{ board.name }}" size="10" style="font-size:25px">
@@ -20,6 +22,6 @@
     </ul>
     {% endif %}
     <p><a href="new_list/">create new list</a></p>
-    <p><a href="/">Back</a></p>
+    <p><a href="/">Home</a></p>
 </body>
 </html>

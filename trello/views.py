@@ -51,9 +51,12 @@ def card(request, board_id, list_id, card_id):
     except Card.DoesNotExist:
         raise Http404()
     label_list = Label.objects.filter(board_id=board_id)
-    count = label_list.count()
+    label_count = label_list.count()
     label = None
     list_list = List.objects.filter(board_id=board_id).order_by('name')
+    member_list = Member.objects.order_by('name')
+    participating_members = card.member_set.all()
+    member_count = participating_members.count()
     try:
         label = label_list.get(card_id=card_id)
         hasLabel = True
@@ -63,10 +66,13 @@ def card(request, board_id, list_id, card_id):
         'board_id': board_id,
         'list_id': list_id,
         'card': card,
-        'nlabels': count,
+        'nlabels': label_count,
         'hasLabel': hasLabel,
         'label': label,
         'lists': list_list,
+        'nmembers': member_count,
+        'members': participating_members,
+        'all_members': member_list,
     })
 
 def new_card(request, board_id, list_id):
@@ -81,6 +87,26 @@ def new_label(request, board_id, list_id, card_id):
         'list_id': list_id,
         'card_id': card_id,
     })
+
+def members(request):
+    member_list = Member.objects.all()
+    count = member_list.count()
+    return render(request, 'members.html', {
+        'nmembers': count,
+        'members': member_list,
+    })
+
+def member(request, member_id):
+    try:
+        member = Member.objects.get(id=member_id)
+    except Member.DoesNotExist:
+        raise Http404()
+    return render(request, 'member.html', {
+        'member': member,
+    })
+
+def new_member(request):
+    return render(request, 'new_member.html')
 
 def request_handler(request):
     if 'add_board' in request.POST and request.POST['add_board']:
@@ -198,6 +224,44 @@ def request_handler(request):
             lb.name = request.POST['label_name']
             lb.save()
         except Label.DoesNotExist:
+            pass
+        redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
+            request.POST['board_id'],
+            request.POST['list_id'],
+            request.POST['card_id'])
+        return HttpResponseRedirect(redirect_url)
+    elif 'add_member' in request.POST and request.POST['add_member']:
+        m = Member(name=request.POST['add_member'])
+        m.save()
+        redirect_url='/Members/'
+        return HttpResponseRedirect(redirect_url)
+    elif 'delete_member' in request.POST and request.POST['member_id']:
+        try:
+            m = Member.objects.get(id=request.POST['member_id'])
+            m.delete()
+        except Member.DoesNotExist:
+            pass
+        redirect_url='/Members/'
+        return HttpResponseRedirect(redirect_url)
+    elif 'rename_member' in request.POST and request.POST['member_id'] and request.POST['member_name']:
+        try:
+            m = Member.objects.get(id=request.POST['member_id'])
+            m.name = request.POST['member_name']
+            m.save()
+        except Member.DoesNotExist:
+            pass
+        redirect_url='/Members/%s/' % (
+            request.POST['member_id'])
+        return HttpResponseRedirect(redirect_url)
+    elif 'assign_member' in request.POST and request.POST['new_member']:
+        try:
+            m = Member.objects.get(id=request.POST['new_member'])
+            c = Card.objects.get(id=request.POST['card_id'])
+            m.card.add(c)
+            c.member_set.add(m)
+        except Member.DoesNotExist:
+            pass
+        except Card.DoesNotExist:
             pass
         redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
             request.POST['board_id'],
