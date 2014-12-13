@@ -3,9 +3,8 @@ from django.shortcuts import render
 from trello.models import *
 
 def home(request):
-    boards = Board.objects
-    count = boards.count()
-    board_list = boards.all()
+    board_list = Board.objects.all()
+    count = board_list.count()
     return render(request, 'overview.html', {
         'nboards': count,
         'boards': board_list,
@@ -16,9 +15,8 @@ def board(request, board_id):
         board = Board.objects.get(id=board_id)
     except Board.DoesNotExist:
         raise Http404()
-    lists = List.objects
-    count = lists.count()
-    list_list = lists.all()
+    list_list = List.objects.filter(board_id=board_id)
+    count = list_list.count()
     return render(request, 'board.html', {
         'board': board,
         'nlists': count,
@@ -33,9 +31,8 @@ def list(request, board_id, list_id):
         list = List.objects.get(id=list_id)
     except List.DoesNotExist:
         raise Http404()
-    cards = Card.objects
-    count = cards.count()
-    card_list = cards.all()
+    card_list = Card.objects.filter(list_id=list_id)
+    count = card_list.count()
     return render(request, 'list.html', {
         'board_id': board_id,
         'list': list,
@@ -53,9 +50,8 @@ def card(request, board_id, list_id, card_id):
         card = Card.objects.get(id=card_id)
     except Card.DoesNotExist:
         raise Http404()
-    labels = Label.objects
-    count = labels.count()
-    label_list = labels.all()
+    label_list = Label.objects.filter(card_id=card_id)
+    count = label_list.count()
     return render(request, 'card.html', {
         'board_id': board_id,
         'list_id': list_id,
