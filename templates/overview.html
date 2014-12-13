@@ -1,0 +1,16 @@
+<html>
+<head>
+    <title>Project Trello</title>
+</head>
+<body>
+    <h1>Overview</h1>
+    {% if nboards %}
+    <ul>
+        {% for board in boards %}
+        <li><a href="Boards/{{ board.id }}">{{ board.name }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <p><a href="new_board">create new board</a></p>
+</body>
+</html>
