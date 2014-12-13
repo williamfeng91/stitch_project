@@ -21,9 +21,12 @@ def new_board(request):
     return render(request, 'new_board.html')
 
 def request_handler(request):
-    if 'add_board_name' in request.POST and request.POST['add_board_name']:
-        new_board = Board(name=request.POST['add_board_name'])
-        new_board.save()
+    if 'add_board' in request.POST and request.POST['add_board']:
+        b = Board(name=request.POST['add_board'])
+        b.save()
+    elif 'delete_board' in request.POST and request.POST['delete_board']:
+        b = Board.objects.get(id=request.POST['delete_board'])
+        b.delete()
     else:
         raise Http404()
     return HttpResponseRedirect('/')
