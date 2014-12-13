@@ -14,12 +14,20 @@
     </form>
     <hr>
     {% if nlists %}
-    <ul>
-        Lists
+    Lists
+    <table>
         {% for list in lists %}
-        <li><a href="Lists/{{ list.id }}/">{{ list.name }}</a></li>
+        <tr>
+            <form action="/request/" method="post">
+                <td><a href="Lists/{{ list.id }}/">{{ list.name }}</a></td>
+                <input type="hidden" name="board_id" value="{{ board.id }}">
+                <input type="hidden" name="list_id" value="{{ list.id }}">
+                <td><input type="submit" name="list_up" value="up"></td>
+                <td><input type="submit" name="list_down" value="down"></td>
+            </form>
+        </tr>
         {% endfor %}
-    </ul>
+    </table>
     {% endif %}
     <p><a href="new_list/">create new list</a></p>
     <p><a href="/">Home</a></p>

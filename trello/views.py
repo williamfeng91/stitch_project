@@ -268,6 +268,76 @@ def request_handler(request):
             request.POST['list_id'],
             request.POST['card_id'])
         return HttpResponseRedirect(redirect_url)
+    elif 'list_up' in request.POST:
+        try:
+            id1 = request.POST['list_id']
+            l1 = List.objects.get(id=id1)
+            id2 = List.objects.filter(board=request.POST['board_id']).filter(id__lt=id1).count() - 1
+            if id2 >= 0:
+                l2 = List.objects.all()[id2]
+                id2 = l2.id
+                l1.id = id2
+                l2.id = id1
+                l1.save()
+                l2.save()
+        except List.DoesNotExist:
+            pass
+        redirect_url='/Boards/%s/' % (
+            request.POST['board_id'])
+        return HttpResponseRedirect(redirect_url)
+    elif 'list_down' in request.POST:
+        try:
+            id1 = request.POST['list_id']
+            l1 = List.objects.get(id=id1)
+            l = List.objects.filter(board=request.POST['board_id']).filter(id__gt=id1)
+            if l.count() > 0:
+                l2 = l[0]
+                id2 = l2.id
+                l1.id = id2
+                l2.id = id1
+                l1.save()
+                l2.save()
+        except List.DoesNotExist:
+            pass
+        redirect_url='/Boards/%s/' % (
+            request.POST['board_id'])
+        return HttpResponseRedirect(redirect_url)
+    elif 'card_up' in request.POST:
+        try:
+            id1 = request.POST['card_id']
+            c1 = Card.objects.get(id=id1)
+            id2 = Card.objects.filter(list=request.POST['list_id']).filter(id__lt=id1).count() - 1
+            if id2 >= 0:
+                c2 = Card.objects.all()[id2]
+                id2 = c2.id
+                c1.id = id2
+                c2.id = id1
+                c1.save()
+                c2.save()
+        except Card.DoesNotExist:
+            pass
+        redirect_url='/Boards/%s/Lists/%s/' % (
+            request.POST['board_id'],
+            request.POST['list_id'])
+        return HttpResponseRedirect(redirect_url)
+    elif 'card_down' in request.POST:
+        try:
+            id1 = request.POST['card_id']
+            c1 = Card.objects.get(id=id1)
+            c = Card.objects.filter(list=request.POST['list_id']).filter(id__gt=id1)
+            if c.count() > 0:
+                c2 = c[0]
+                id2 = c2.id
+                c1.id = id2
+                c2.id = id1
+                c1.save()
+                c2.save()
+        except Card.DoesNotExist:
+            pass
+        redirect_url='/Boards/%s/Lists/%s/' % (
+            request.POST['board_id'],
+            request.POST['list_id'])
+        return HttpResponseRedirect(redirect_url)
     else:
         raise Http404()
     return HttpResponseRedirect('/')
