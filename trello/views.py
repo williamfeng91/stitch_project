@@ -53,6 +53,7 @@ def card(request, board_id, list_id, card_id):
     label_list = Label.objects.filter(board_id=board_id)
     count = label_list.count()
     label = None
+    list_list = List.objects.filter(board_id=board_id).order_by('name')
     try:
         label = label_list.get(card_id=card_id)
         hasLabel = True
@@ -65,6 +66,7 @@ def card(request, board_id, list_id, card_id):
         'nlabels': count,
         'hasLabel': hasLabel,
         'label': label,
+        'lists': list_list,
     })
 
 def new_card(request, board_id, list_id):
@@ -150,18 +152,21 @@ def request_handler(request):
             request.POST['board_id'],
             request.POST['list_id'])
         return HttpResponseRedirect(redirect_url)
-    elif 'change_card' in request.POST and request.POST['card_id'] and request.POST['card_title']:
+    elif 'edit_card' in request.POST and request.POST['card_id'] and request.POST['card_title']:
         try:
             c = Card.objects.get(id=request.POST['card_id'])
             c.title = request.POST['card_title']
             c.description = request.POST['card_description']
-            c.due_date = request.POST['card_due_date']
+            if request.POST['card_due_date']:
+                c.due_date = request.POST['card_due_date']
+            if request.POST['moveTo'] and request.POST['moveTo'] != c.list_id:
+                c.list_id = request.POST['moveTo']
             c.save()
         except Card.DoesNotExist:
             pass
         redirect_url='/Boards/%s/Lists/%s/Cards/%s/' % (
             request.POST['board_id'],
-            request.POST['list_id'],
+            c.list_id,
             request.POST['card_id'])
         return HttpResponseRedirect(redirect_url)
     elif 'add_label' in request.POST and request.POST['add_label']:
