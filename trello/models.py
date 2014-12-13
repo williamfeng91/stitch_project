@@ -24,6 +24,7 @@ class Card(models.Model):
 
 class Label(models.Model):
     name = models.CharField(max_length = 30)
+    board = models.ForeignKey(Board)
     card = models.ForeignKey(Card)
 
     def __unicode__(self):

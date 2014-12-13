@@ -50,14 +50,21 @@ def card(request, board_id, list_id, card_id):
         card = Card.objects.get(id=card_id)
     except Card.DoesNotExist:
         raise Http404()
-    label_list = Label.objects.filter(card_id=card_id)
+    label_list = Label.objects.filter(board_id=board_id)
     count = label_list.count()
+    label = None
+    try:
+        label = label_list.get(card_id=card_id)
+        hasLabel = True
+    except Label.DoesNotExist:
+        hasLabel = False
     return render(request, 'card.html', {
         'board_id': board_id,
         'list_id': list_id,
         'card': card,
         'nlabels': count,
-        'labels': label_list,
+        'hasLabel': hasLabel,
+        'label': label,
     })
 
 def new_card(request, board_id, list_id):
@@ -125,6 +132,7 @@ def request_handler(request):
     elif 'add_label' in request.POST and request.POST['add_label']:
         lb = Label(
             name=request.POST['add_label'],
+            board_id=request.POST['board_id'],
             card_id=request.POST['card_id'],
         )
         lb.save()
