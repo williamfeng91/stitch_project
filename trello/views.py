@@ -1,8 +1,8 @@
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from trello.models import Board
 
-def display_overview(request):
+def home(request):
     boards = Board.objects
     count = boards.count()
     board_list = boards.all()
@@ -11,5 +11,19 @@ def display_overview(request):
         'boards': board_list,
     })
 
-def display_board(request, board_id):
-    return render(request, 'board.html', {'id': board_id})
+def board(request, board_id):
+    board = Board.objects.get(id=board_id)
+    return render(request, 'board.html', {
+        'board': board,
+    })
+
+def new_board(request):
+    return render(request, 'new_board.html')
+
+def request_handler(request):
+    if 'add_board_name' in request.POST and request.POST['add_board_name']:
+        new_board = Board(name=request.POST['add_board_name'])
+        new_board.save()
+    else:
+        raise Http404()
+    return HttpResponseRedirect('/')
